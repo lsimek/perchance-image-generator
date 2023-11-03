@@ -1,0 +1,25 @@
+Selected prompt Resilience, Ecstasy, Yeti, Sorrow, Protest, Marigold, The Pyramids, Viper, Rhubarb, Saturn and style fantasy-painting.
+Starting new HTTPS connection (1): image-generation.perchance.org:443
+https://image-generation.perchance.org:443 "GET /api/checkVerificationStatus?userKey=9b401edf34e6929357e70654228de7befe311c40dacc3a2c636604c1e5e6aa86&__cacheBust=0.0908993115101977 HTTP/1.1" 200 21
+Found working key 9b401edf34... in file.
+Starting new HTTPS connection (1): image-generation.perchance.org:443
+https://image-generation.perchance.org:443 "GET /api/generate?prompt=%2527Resilience%252C%2520Ecstasy%252C%2520Yeti%252C%2520Sorrow%252C%2520Protest%252C%2520Marigold%252C%2520The%2520Pyramids%252C%2520Viper%252C%2520Rhubarb%252C%2520Saturn%252C%2520d%26d%252C%2520fantasy%252C%2520highly%2520detailed%252C%2520digital%2520painting%252C%2520artstation%252C%2520sharp%2520focus%252C%2520fantasy%2520art%252C%2520illustration%252C%25208k%252C%2520in%2520the%2520style%2520of%2520greg%2520rutkowski&negativePrompt=%2527nudity%252C%2520text%252C%2520low-quality%252C%2520deformed%252C%2520text%252C%2520poorly%2520drawn&userKey=9b401edf34e6929357e70654228de7befe311c40dacc3a2c636604c1e5e6aa86&__cache_bust=0.7714634841306227&seed=-1&resolution=512x768&guidanceScale=7&channel=ai-text-to-image-generator&subChannel=public&requestId=0.23544492249091964 HTTP/1.1" 200 477
+Starting new HTTPS connection (1): image-generation.perchance.org:443
+https://image-generation.perchance.org:443 "GET /api/downloadTemporaryImage?imageId=8c45ca15cf9e54fd7384b7949a263fde4a75bddde2db1c5156444322b94bb503 HTTP/1.1" 200 70820
+Created picture 1/3.
+Starting new HTTPS connection (1): image-generation.perchance.org:443
+https://image-generation.perchance.org:443 "GET /api/checkVerificationStatus?userKey=9b401edf34e6929357e70654228de7befe311c40dacc3a2c636604c1e5e6aa86&__cacheBust=0.9554213458198806 HTTP/1.1" 200 21
+Found working key 9b401edf34... in file.
+Starting new HTTPS connection (1): image-generation.perchance.org:443
+https://image-generation.perchance.org:443 "GET /api/generate?prompt=%2527Resilience%252C%2520Ecstasy%252C%2520Yeti%252C%2520Sorrow%252C%2520Protest%252C%2520Marigold%252C%2520The%2520Pyramids%252C%2520Viper%252C%2520Rhubarb%252C%2520Saturn%252C%2520d%26d%252C%2520fantasy%252C%2520highly%2520detailed%252C%2520digital%2520painting%252C%2520artstation%252C%2520sharp%2520focus%252C%2520fantasy%2520art%252C%2520illustration%252C%25208k%252C%2520in%2520the%2520style%2520of%2520greg%2520rutkowski&negativePrompt=%2527nudity%252C%2520text%252C%2520low-quality%252C%2520deformed%252C%2520text%252C%2520poorly%2520drawn&userKey=9b401edf34e6929357e70654228de7befe311c40dacc3a2c636604c1e5e6aa86&__cache_bust=0.25912528616202635&seed=-1&resolution=512x768&guidanceScale=7&channel=ai-text-to-image-generator&subChannel=public&requestId=0.7170937835117943 HTTP/1.1" 200 476
+Starting new HTTPS connection (1): image-generation.perchance.org:443
+https://image-generation.perchance.org:443 "GET /api/downloadTemporaryImage?imageId=9d8a968aa150dd75f3757786387eac86e77e3722ddb77b828e37080113d2efae HTTP/1.1" 200 69153
+Created picture 2/3.
+Starting new HTTPS connection (1): image-generation.perchance.org:443
+https://image-generation.perchance.org:443 "GET /api/checkVerificationStatus?userKey=9b401edf34e6929357e70654228de7befe311c40dacc3a2c636604c1e5e6aa86&__cacheBust=0.3319348729058855 HTTP/1.1" 200 21
+Found working key 9b401edf34... in file.
+Starting new HTTPS connection (1): image-generation.perchance.org:443
+https://image-generation.perchance.org:443 "GET /api/generate?prompt=%2527Resilience%252C%2520Ecstasy%252C%2520Yeti%252C%2520Sorrow%252C%2520Protest%252C%2520Marigold%252C%2520The%2520Pyramids%252C%2520Viper%252C%2520Rhubarb%252C%2520Saturn%252C%2520d%26d%252C%2520fantasy%252C%2520highly%2520detailed%252C%2520digital%2520painting%252C%2520artstation%252C%2520sharp%2520focus%252C%2520fantasy%2520art%252C%2520illustration%252C%25208k%252C%2520in%2520the%2520style%2520of%2520greg%2520rutkowski&negativePrompt=%2527nudity%252C%2520text%252C%2520low-quality%252C%2520deformed%252C%2520text%252C%2520poorly%2520drawn&userKey=9b401edf34e6929357e70654228de7befe311c40dacc3a2c636604c1e5e6aa86&__cache_bust=0.1723240445997083&seed=-1&resolution=512x768&guidanceScale=7&channel=ai-text-to-image-generator&subChannel=public&requestId=0.4736253286138622 HTTP/1.1" 200 476
+Starting new HTTPS connection (1): image-generation.perchance.org:443
+https://image-generation.perchance.org:443 "GET /api/downloadTemporaryImage?imageId=cc810226b61a74069c4ec52d01ce0b095b1295dcde1646ca43534761474b94a4 HTTP/1.1" 200 60366
+Created picture 3/3.
