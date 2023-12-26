@@ -4,6 +4,8 @@ import random
 import requests
 from styles import styles
 from logging_settings import network_logger, info_logger
+from urllib.parse import quote, urlencode
+from time import sleep
 
 
 def encode(prompt):
@@ -23,6 +25,7 @@ def image_generator(
         prompt_size=10,
         negative_prompt='',
         style='RANDOM',
+        resolution='512x768',
         guidance_scale=7
 ):
     create_url = 'https://image-generation.perchance.org/api/generate'
@@ -39,7 +42,7 @@ def image_generator(
         style_pair = styles[style_choice]
     else:
         try:
-            style_choice=style
+            style_choice = style
             style_pair = styles[style_choice]
         except KeyError:
             raise Exception(f'Style choice {style} was not recognized. Check styles.py.')
@@ -47,9 +50,9 @@ def image_generator(
     prompt_style = styles[style_choice][0]
     negative_prompt_style = styles[style_choice][1]
 
-    prompt_query = encode(prompt_base + ', ' + prompt_style)
-    negative_prompt_query = encode(negative_prompt + ', ' + negative_prompt_style)
-    info_logger.info(f'Selected prompt {prompt_base} and style {style_choice}.')
+    prompt_query = quote('\'' + prompt_base + ', ' + prompt_style)
+    negative_prompt_query = quote('\'' + negative_prompt + ', ' + negative_prompt_style)
+    info_logger.info(f'Selected prompt {prompt_base} and style {style_choice}')
 
     for idx in range(1, amount+1):
         user_key = get_key()
@@ -62,28 +65,39 @@ def image_generator(
             'userKey': user_key,
             '__cache_bust': cache_bust,
             'seed': '-1',
-            'resolution': '512x768',
+            'resolution': resolution,
             'guidanceScale': str(guidance_scale),
             'channel': 'ai-text-to-image-generator',
             'subChannel': 'public',
             'requestId': request_id
         }
+        create_params_str = urlencode(create_params, safe=':%')
 
-        create_response = requests.get(create_url, params=create_params)
+        create_response = requests.get(create_url, params=create_params_str)
 
         if 'invalid_key' in create_response.text:
             raise Exception('Image could not be generated (invalid key).')
 
+        exit_flag = False
+        while not exit_flag:
+            try:
+                image_id = create_response.json()['imageId']
+                exit_flag = True
+            except KeyError:
+                info_logger.info('Waiting for previous request to finish...')
+                sleep(8)
+                create_response = requests.get(create_url, params=create_params_str)
+
         download_params = {
-            'imageId': create_response.json()['imageId']
+            'imageId': image_id
         }
         download_response = requests.get(download_url, params=download_params)
 
-        filename = f'generated-pictures/{base_filename}{idx}.jpeg'
+        filename = f'generated-pictures/{base_filename}{idx}.jpeg' if base_filename else f'generated-pictures/{image_id}.jpeg'
         with open(filename, 'wb') as file:
             file.write(download_response.content)
 
-        info_logger.info(f'Created picture {idx}/{amount}.')
+        info_logger.info(f'Created picture {idx}/{amount} ({filename=})')
         yield {
             'filename': filename,
             'prompt': prompt_base,

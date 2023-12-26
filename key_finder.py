@@ -10,12 +10,12 @@ import asyncio
 async def get_url_data():
     url_data = []
     async with async_playwright() as p:
-        browser = await p.firefox.launch(headless=False)
+        browser = await p.firefox.launch(headless=True)
         page = await browser.new_page()
 
         def request_handler(request):
             request_info = f'{request.method} {request.url} \n'
-            network_logger.log(5, request_info)
+            network_logger.info(request_info)
             url_data.append(request.url)
 
         page.on("request", request_handler)  # capture traffic
@@ -25,11 +25,21 @@ async def get_url_data():
         iframe_element = await page.query_selector('xpath=//iframe[@src]')
         frame = await iframe_element.content_frame()
         await frame.click('xpath=//button[@id="generateButtonEl"]')
-        sleep(10)
+
+        key = None
+        while key is None:
+            pattern = r'userKey=([a-f\d]{64})'
+            all_urls = ''.join(url_data)
+            keys = re.findall(pattern, all_urls)
+            if keys:
+                key = keys[0]
+            url_data = []
+
+            await asyncio.sleep(1)
 
         await browser.close()
 
-    return url_data
+    return key
 
 
 def get_key():
@@ -61,14 +71,8 @@ def get_key():
 
     info_logger.info(f'Key no longer valid. Looking for a new key...')
     loop = asyncio.get_event_loop()
-    url_data = loop.run_until_complete(get_url_data())
+    key = loop.run_until_complete(get_url_data())
 
-    url_data = [url for url in url_data if 'generate?prompt' in url]
-    all_text = ''.join(url_data)
-    pattern = r'userKey=([a-f\d]{64})'
-    keys = re.findall(pattern, all_text)
-
-    key = keys[0]
     info_logger.info(f'Found key {key[:10]}...')
     with open('last_key.txt', 'w') as file:
         file.write(key)

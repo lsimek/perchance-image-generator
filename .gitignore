@@ -1,3 +1,4 @@
-wordlist.py
-styles.py
-network_log.txt
+*.log
+last-key.txt
+__pycache__
+.idea

@@ -1,20 +1,21 @@
 import logging
 import sys
 
-# networking logger
-logging.addLevelName(5, 'network')
+# network logger
+network_logger = logging.getLogger('request-logger')
 
-network_logger = logging.getLogger('')
-network_logger.setLevel(5)
+file_handler = logging.FileHandler('network-log.log', mode='w')
 
-file_handler = logging.FileHandler('network_log.log', mode='w')
-file_handler.setLevel('network')
+network_formatter = logging.Formatter('%(asctime)s - %(message)s', '%H:%M:%S')
+file_handler.setFormatter(network_formatter)
+
 network_logger.addHandler(file_handler)
+
+network_logger.setLevel(logging.INFO)
 
 
 # info logger
 info_logger = logging.getLogger('Image Generation')
-info_logger.setLevel(logging.INFO)
 
 stdout_handler = logging.StreamHandler(sys.stdout)
 
