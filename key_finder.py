@@ -3,9 +3,7 @@ from playwright.async_api import async_playwright
 import requests
 import re
 from random import random as uniform
-from time import sleep
 import asyncio
-from os.path import exists
 
 
 async def get_url_data():
@@ -50,33 +48,32 @@ def get_key():
     """
 
     key = None
-    if exists('last_key.txt'):
-        with open('last_key.txt', 'r') as file:
-            line = file.readline()
+    with open('last-key.txt', 'a+') as file:
+        line = file.readline()
 
-        if line is not None:
-            verification_url = 'https://image-generation.perchance.org/api/checkVerificationStatus'
-            user_key = line
-            cache_bust = uniform()
-            verification_params = {
-                'userKey': user_key,
-                '__cacheBust': cache_bust
-            }
+    if line is not None:
+        verification_url = 'https://image-generation.perchance.org/api/checkVerificationStatus'
+        user_key = line
+        cache_bust = uniform()
+        verification_params = {
+            'userKey': user_key,
+            '__cacheBust': cache_bust
+        }
 
-            response = requests.get(verification_url, params=verification_params)
-            if 'not_verified' not in response.text:
-                key = line
+        response = requests.get(verification_url, params=verification_params)
+        if 'not_verified' not in response.text:
+            key = line
 
-        if key is not None:
-            info_logger.info(f'Found working key {key[:10]}... in file.')
-            return key
+    if key is not None:
+        info_logger.info(f'Found working key {key[:10]}... in file.')
+        return key
 
     info_logger.info(f'Key no longer valid. Looking for a new key...')
     loop = asyncio.get_event_loop()
     key = loop.run_until_complete(get_url_data())
 
     info_logger.info(f'Found key {key[:10]}...')
-    with open('last_key.txt', 'w') as file:
+    with open('last-key.txt', 'w') as file:
         file.write(key)
 
     return key

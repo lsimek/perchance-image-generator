@@ -6,7 +6,6 @@ from styles import styles
 from logging_settings import network_logger, info_logger
 from urllib.parse import quote, urlencode
 from time import sleep
-from os.path import exists
 from os import makedirs
 
 def encode(prompt):
@@ -40,11 +39,9 @@ def image_generator(
     if style == 'RANDOM':
         list_of_styles = list(styles.keys())
         style_choice = random.choice(list_of_styles)
-        style_pair = styles[style_choice]
     else:
         try:
             style_choice = style
-            style_pair = styles[style_choice]
         except KeyError:
             raise Exception(f'Style choice {style} was not recognized. Check styles.py.')
 
@@ -95,8 +92,8 @@ def image_generator(
         download_response = requests.get(download_url, params=download_params)
 
         generated_dir = 'generated-pictures'
-        if not exists(generated_dir):
-            makedirs(generated_dir)
+        makedirs(generated_dir, exist_ok=True)
+
         filename = f'{generated_dir}/{base_filename}{idx}.jpeg' if base_filename else f'{generated_dir}/{image_id}.jpeg'
         with open(filename, 'wb') as file:
             file.write(download_response.content)
