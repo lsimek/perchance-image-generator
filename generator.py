@@ -97,7 +97,7 @@ def image_generator(
         generated_dir = 'generated-pictures'
         if not exists(generated_dir):
             makedirs(generated_dir)
-        filename = f'{generated_dir}/{base_filename}{idx}.jpeg' if base_filename else f'generated-pictures/{image_id}.jpeg'
+        filename = f'{generated_dir}/{base_filename}{idx}.jpeg' if base_filename else f'{generated_dir}/{image_id}.jpeg'
         with open(filename, 'wb') as file:
             file.write(download_response.content)
 
