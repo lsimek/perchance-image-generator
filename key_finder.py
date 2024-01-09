@@ -3,7 +3,6 @@ from playwright.async_api import async_playwright
 import requests
 import re
 from random import random as uniform
-from time import sleep
 import asyncio
 
 
@@ -49,7 +48,7 @@ def get_key():
     """
 
     key = None
-    with open('last_key.txt', 'r') as file:
+    with open('last-key.txt', 'a+') as file:
         line = file.readline()
 
     if line is not None:
@@ -74,7 +73,7 @@ def get_key():
     key = loop.run_until_complete(get_url_data())
 
     info_logger.info(f'Found key {key[:10]}...')
-    with open('last_key.txt', 'w') as file:
+    with open('last-key.txt', 'w') as file:
         file.write(key)
 
     return key

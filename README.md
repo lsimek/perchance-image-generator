@@ -9,7 +9,7 @@ It is encouraged to write your own `wordlist.py` wordlist and styles in `styles.
 ## About
 This project enables automatic usage of [Perchance's free AI image generator](https://perchance.org/ai-text-to-image-generator), also enabling some features not available through the GUI. The generator `generator.image_generator` can itself be used, but user-friendly access through a CLI is given by `main.py`. Example call
 ```
-python main.py -f newimage -n 3 -style traditional-japanese
+python main.py -f newimage -n 3 --style traditional-japanese
 ```
 It is recommended to create an alias in `~/.bash_aliases` or equivalent, e.g.
 ```
