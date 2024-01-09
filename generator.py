@@ -6,7 +6,8 @@ from styles import styles
 from logging_settings import network_logger, info_logger
 from urllib.parse import quote, urlencode
 from time import sleep
-
+from os.path import exists
+from os import makedirs
 
 def encode(prompt):
     replacement_dict = {
@@ -93,7 +94,10 @@ def image_generator(
         }
         download_response = requests.get(download_url, params=download_params)
 
-        filename = f'generated-pictures/{base_filename}{idx}.jpeg' if base_filename else f'generated-pictures/{image_id}.jpeg'
+        generated_dir = 'generated-pictures'
+        if not exists(generated_dir):
+            makedirs(generated_dir)
+        filename = f'{generated_dir}/{base_filename}{idx}.jpeg' if base_filename else f'generated-pictures/{image_id}.jpeg'
         with open(filename, 'wb') as file:
             file.write(download_response.content)
 
