@@ -49,9 +49,10 @@ def get_key():
 
     key = None
     with open('last-key.txt', 'a+') as file:
+        file.seek(0)
         line = file.readline()
 
-    if line is not None:
+    if line != '':
         verification_url = 'https://image-generation.perchance.org/api/checkVerificationStatus'
         user_key = line
         cache_bust = uniform()
