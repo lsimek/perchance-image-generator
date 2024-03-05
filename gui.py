@@ -131,18 +131,23 @@ def image_generator(base_filename='', amount=1, prompt='RANDOM', prompt_size=10,
         prompt_base = wordlist.get_prompt(prompt_size)
     else:
         prompt_base = prompt
+
     if style == 'RANDOM':
-        list_of_styles = list(styles.keys())
-        style_choice = random.choice(list_of_styles)
+        # Pick a random style from the list excluding the first 'NONE' option
+        _, style_description = random.choice(styles[1:])
     else:
-        style_choice = style
+        # Find the style description by the style name; default to empty string if not found
+        style_description = next((desc for name, desc in styles if name == style), "")
 
-    prompt_style = styles[style_choice][0]
-    negative_prompt_style = styles[style_choice][1]
+    # Correctly use style_description for the prompt query
+    prompt_query = quote('\'' + prompt_base + ', ' + style_description)
+    negative_prompt_query = quote('\'' + negative_prompt)  # Assuming negative_prompt is used differently
 
-    prompt_query = quote('\'' + prompt_base + ', ' + prompt_style)
-    negative_prompt_query = quote('\'' + negative_prompt + ', ' + negative_prompt_style)
-    info_logger(f'Selected prompt {prompt_base} and style {style_choice}')
+    # Logging information
+    info_logger(f'Selected prompt: {prompt_base}, Style: {style}')
+    info_logger(f'Encoded prompt: {prompt_query}, Encoded negative prompt: {negative_prompt_query}')
+
+ 
 
     for idx in range(1, amount + 1):
         user_key = get_key()
@@ -162,6 +167,9 @@ def image_generator(base_filename='', amount=1, prompt='RANDOM', prompt_size=10,
             'requestId': request_id
         }
         create_params_str = urlencode(create_params, safe=':%')
+
+        # Log the request parameters being sent
+        info_logger(f'Sending parameters: {create_params}')
 
         create_response = requests.get(create_url, params=create_params_str)
         if 'invalid_key' in create_response.text:
@@ -183,16 +191,12 @@ def image_generator(base_filename='', amount=1, prompt='RANDOM', prompt_size=10,
         generated_dir = get_pictures_folder()
         os.makedirs(generated_dir, exist_ok=True)
 
-        for idx in range(1, amount + 1):
-            # The image generation logic remains unchanged...
+        filename = os.path.join(generated_dir, f'{base_filename}{idx}.jpeg' if base_filename else f'{image_id}.jpeg')
+        with open(filename, 'wb') as file:
+            file.write(download_response.content)
 
-            # Modify the filename path to use the generated_dir
-            filename = os.path.join(generated_dir, f'{base_filename}{idx}.jpeg' if base_filename else f'{image_id}.jpeg')
-            with open(filename, 'wb') as file:
-                file.write(download_response.content)
-
-            info_logger(f'Created picture {idx}/{amount} ({filename=})')
-            yield {'filename': filename, 'prompt': prompt_base, 'negative_prompt': negative_prompt}
+        info_logger(f'Created picture {idx}/{amount} ({filename})')
+        yield {'filename': filename, 'prompt': prompt_base, 'negative_prompt': negative_prompt}
 
 class GeneratingPopup(Toplevel):
     def __init__(self, master=None):
@@ -228,29 +232,64 @@ class GeneratingPopup(Toplevel):
         self.progress.stop()
         self.destroy()
 
+styles = [
+    ("NONE", ""),
+    ("ANIME", "anime atmospheric, atmospheric anime, anime character; full body art, digital anime art, beautiful anime art style, anime picture, anime arts, beautiful anime style, digital advanced anime art, anime painting, anime artwork, beautiful anime art, detailed digital anime art, anime epic artwork"),
+    ("CARTOON", "cartoon style, children's cartoons shown on TV networks, playful and entertaining cartoons, bold outlines, bright colors, and exaggerated features, oversized eyes, face and feature, playful energy to a colorful world"),
+    ("CINEMATIC_RENDER", "detailed hands, realistic skin, focused subject, cinematic, breathtaking colors, CGSociety, computer rendering, by Mike Winkelmann, UHD, rendered in Cinema4D, surface modeling, 8k, render Octane, inspired by Beksinski"),
+    ("CYBERPUNK", "synthwave image, (neotokyo), dreamy colorful cyberpunk colors, cyberpunk Blade Runner art, retrofuturism, cyberpunk, beautiful cyberpunk style, CGSociety 9"),
+    ("DISNEY", "disney animation, disney splash art, disney color palette, disney renaissance film, disney pixar movie still, disney art style, disney concept art :: nixri, realistic, cinematic composition, wonderful compositions, pixar, disney concept artists, 2d character design"),
+    ("DYSTOPIAN", "cifi world, cybernetic civilizations, peter gric and dan mumford, brutalist dark futuristic, dystopian brutalist atmosphere, dark dystopian world, cinematic 8k, end of the world, doomsday"),
+    ("GRAFFITI", "graffiti background, colorful graffiti, graffiti art style, colorful mural, ravi supa, symbolic mural, juxtapoz, pablo picasso, street art"),
+    ("GTA", "gta iv art style, gta art, gta loading screen art, gta chinatown art style, gta 5 loading screen poster, grand theft auto 5, grand theft auto video game"),
+    ("HIGH_QUALITY", "High Quality, 8K, Cinematic Lighting, Stunning background, focused subject, high detail, realistic, incredible 16k resolution produced in Unreal Engine 5 and Octane Render for background, sunshafts"),
+    ("MAGICAL", "magical, magical world, magical realism, magical atmosphere, in a magical world, magical fantasy art"),
+    ("NEON", "neon art style, night time dark with neon colors, blue neon lighting, violet and aqua neon lights, blacklight neon colors, rococo cyber neon lighting"),
+    ("ORIGAMI", "polygonal art, layered paper art, paper origami, wonderful compositions, folded geometry, paper craft, made from paper"),
+    ("PAINTING", "atmospheric dreamscape painting, by Mac Conner, vibrant gouache painting scenery, vibrant painting, vivid painting, a beautiful painting, dream scenery art, Instagram art, psychedelic painting, lo-fi art, bright art"),
+    ("PASTEL_DREAM", "pastel colors, dreamy atmosphere, soft and gentle, whimsical, fantasy world, delicate brushstrokes, light and airy, tranquil, serene, peaceful, nostalgic"),
+    ("PHOTO_REALISTIC", "realistic image, realistic shadows, realistic dramatic lighting, Photo Realistic, 4k, 8k, high resolution, highly detailed, ultra-detailed image, subject focussed, natural beauty, extremely detailed realistic background"),
+    ("PICASO", "painting, by Pablo Picasso, cubism"),
+    ("PIXEL", "pixel art, pixelated, pixel-style, 8-bit style, pixel game, pixel"),
+    ("POP_ART", "Pop art, Roy Lichtenstein, Andy Warhol, pop art style, comic book, pop"),
+    ("RENAISSANCE", "Renaissance period, neo-classical painting, Italian Renaissance workshop, pittura metafisica, Raphael high Renaissance, ancient Roman painting, Michelangelo painting, Leonardo da Vinci, Italian Renaissance architecture"),
+    ("ROCOCO", "François Boucher oil painting, rococo style, rococo lifestyle, a Flemish Baroque, by Karel Dujardin, vintage look, cinematic hazy lighting"),
+    ("THE_1990s", "Technology - Desktop computers, bulky CRT televisions, portable CD players, the early internet, or videogame consoles like the Game Boy or PlayStation, Fashion - High-waisted jeans, bright neon colors, plaid flannel shirts, snapback hats, or the grunge look, Entertainment - Influential 90s movies or TV series like Friends or The Matrix, popular toys like Beanie Babies or Tamagotchis, or recognizable music like Britney Spears or Nirvana, Social Events - Major events like the fall of the Berlin Wall, the Y2K scare, or the rise of hip-hop culture"),
+    ("TROPICAL", "tropical, tropical landscape, tropical beach, paradise, tropical paradise, vibrant colors"),
+    ("URBAN_GRAFFITI", "urban graffiti art, street culture, vibrant tags and murals, rebellious expression, urban decay"),
+    ("VAN_GOGH", "painting, by Van Gogh"),
+    ("VICTORIAN", "Victorian, 19th century, period piece, antique, vintage, historical"),
+    ("VIBRANT", "Psychedelic, watercolor spots, vibrant color scheme, highly detailed, romanticism style, cinematic, ArtStation, Greg Rutkowski"),
+    ("WESTERN", "western, wild west, cowboy, American frontier, rustic, vintage")
+]
+
 # GUI Application
 class ImageGeneratorGUI:
     def __init__(self, master):
         self.master = master
-        master.title("MakuluLinux Image Generator")
+        master.title("Image Generator")
         master.geometry("950x600")  # Adjusted window size as needed
+
+        self.image_positions = []  # To store the positions and paths of images
+        self.generated_images = []  # To store generated image paths
+        self.photo = []  # To keep references to PhotoImage objects
 
         # Initialize the canvas
         self.image_canvas = tk.Canvas(master, width=500, height=500)
         self.image_canvas.place(x=350, y=50)
-        self.image_canvas.bind('<Button-1>', self.open_image)
+        self.image_canvas.bind('<Button-1>', self.on_canvas_click)
 
         # Prompt input
         self.prompt_label = ttk.Label(master, text="Prompt:")
         self.prompt_label.place(x=20, y=20)
-        self.prompt_entry = ttk.Entry(master, width=50)
-        self.prompt_entry.place(x=120, y=20, width=200)  # Added width
+        self.prompt_entry = ttk.Entry(master, width=200)
+        self.prompt_entry.place(x=120, y=20, width=800)  # Added width
 
         # Resolution dropdown
         self.resolution_label = ttk.Label(master, text="Resolution:")
         self.resolution_label.place(x=20, y=60)
         self.resolution_var = tk.StringVar(master)
-        resolutions = ["512x512", "512x768", "768x1024", "1280x720", "1920x1080"]
+        resolutions = ["512x512", "512x768", "512x768", "768x512"]
         self.resolution_var.set(resolutions[0])  # default value
         self.resolution_dropdown = ttk.OptionMenu(master, self.resolution_var, *resolutions)
         self.resolution_dropdown.place(x=120, y=60, width=200)  # Added width
@@ -261,9 +300,21 @@ class ImageGeneratorGUI:
         self.guidance_scale_slider = ttk.Scale(master, from_=1, to_=20, orient='horizontal', value=7)
         self.guidance_scale_slider.place(x=120, y=100, width=200)  # Added width
 
+        # Style dropdown
+        # Correctly create a list of style names for the dropdown
+        style_names = [name for name, _ in styles]
+        self.style_var = tk.StringVar(master)
+        self.style_var.set(style_names[0])  # Set default value to the first style name
+
+        # Initialize the style dropdown with the list of style names
+        self.style__label = ttk.Label(master, text="Styles:")
+        self.style__label.place(x=20, y=140)
+        self.style_dropdown = ttk.OptionMenu(master, self.style_var, style_names[0], *style_names)
+        self.style_dropdown.place(x=120, y=140, width=200)
+
         # Generate button
         self.generate_button = ttk.Button(master, text="Generate", command=self.generate_image)
-        self.generate_button.place(x=20, y=140, width=200)  # Added width
+        self.generate_button.place(x=50, y=200, width=200)  # Added width
 
         # Image display area
         self.image_frame = ttk.Label(master)
@@ -283,38 +334,84 @@ class ImageGeneratorGUI:
         guidance_scale = self.guidance_scale_slider.get()
         base_filename = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
 
+        selected_style = next((description for name, description in styles if name == self.style_var.get()), "")
+        prompt += f', {selected_style}' if selected_style else ''
+
+        # Prepare for new generation
+        self.generated_images.clear()
+        self.photo.clear()
+
         generator = image_generator(
             base_filename=base_filename,
-            amount=1,
+            amount=6,
             prompt=prompt,
             resolution=resolution,
             guidance_scale=guidance_scale
         )
 
+        # Collect generated images
         for generated in generator:
-            self.display_image(generated['filename'])
-        
+            self.generated_images.append(generated['filename'])
+
+        self.display_images()  # Update the canvas with new images
+
         # Close the popup and re-enable the generate button
         self.popup.close()
         self.generate_button.config(state="normal")
 
-    def display_image(self, path):
-        img = Image.open(path)
-        img.thumbnail((500, 500), Image.LANCZOS)  # Resize to fit within the display area, maintaining aspect ratio
-        self.photo = ImageTk.PhotoImage(img)  # This needs to be stored as an instance attribute
-
+    def display_images(self):
         self.image_canvas.delete("all")  # Clear any existing content on the canvas
-        self.image_canvas.create_image(250, 250, image=self.photo, anchor="center")
+        self.image_positions.clear()  # Clear previous positions
 
-        self.current_image_path = path  # Update the current image path for opening functionality 
+        canvas_width = self.image_canvas.winfo_width()
+        canvas_height = self.image_canvas.winfo_height()
 
-    def open_image(self, event=None):
-        if self.current_image_path:  # Check if there is an image path set
+        # Assuming 2 rows and 3 columns grid
+        img_width, img_height = canvas_width // 3, canvas_height // 2
+
+        # Adjust img_width and img_height if the images are smaller than the grid size
+        images = [Image.open(path) for path in self.generated_images]
+        max_width = max(img.size[0] for img in images)
+        max_height = max(img.size[1] for img in images)
+    
+        # Calculate scale factor to fit images within grid
+        scale_width = img_width / float(max_width)
+        scale_height = img_height / float(max_height)
+        scale_factor = min(scale_width, scale_height)
+    
+        for idx, img in enumerate(images):
+            img.thumbnail((max_width * scale_factor, max_height * scale_factor), Image.LANCZOS)
+            photo = ImageTk.PhotoImage(img)
+
+            # Calculate position
+            column = idx % 3
+            row = idx // 3
+            x = (column * img_width) + (img_width // 2)
+            y = (row * img_height) + (img_height - img.height // 2) // 2
+
+            # Display image on canvas
+            self.image_canvas.create_image(x, y, image=photo)
+            self.image_positions.append(((x - img.width // 2, y - img.height // 2, img.width, img.height), self.generated_images[idx]))
+
+            # Keep reference to avoid garbage collection
+            self.photo.append(photo)
+
+
+    def on_canvas_click(self, event):
+        # Determine which image was clicked
+        for position, img_path in self.image_positions:
+            x, y, width, height = position
+            if x - width // 2 < event.x < x + width // 2 and y - height // 2 < event.y < y + height // 2:
+                self.open_image(img_path)
+                break
+
+    def open_image(self, img_path=None):
+        if img_path:  # Check if a specific path is provided
             if platform.system() == "Windows":
-                os.startfile(self.current_image_path)  # Opens the file in the default app on Windows
+                os.startfile(img_path)
             else:
-                opener = "open" if platform.system() == "Darwin" else "xdg-open"  # For macOS, use "open"
-                subprocess.run([opener, self.current_image_path])  # For Linux (and macOS), use subprocess to open
+                opener = "open" if platform.system() == "Darwin" else "xdg-open"
+                subprocess.run([opener, img_path])
 
 if __name__ == "__main__":
     root = tk.Tk()
