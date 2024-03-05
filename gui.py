@@ -122,7 +122,7 @@ def get_pictures_folder():
         print("Unsupported OS. Saving to home directory.")
         return home
 
-def image_generator(base_filename='', amount=1, prompt='RANDOM', prompt_size=10, negative_prompt='', style='RANDOM', resolution='512x768', guidance_scale=7):
+def image_generator(base_filename='', amount=1, prompt='RANDOM', prompt_size=10, negative_prompt='', style='no style', resolution='512x768', guidance_scale=7):
     create_url = 'https://image-generation.perchance.org/api/generate'
     download_url = 'https://image-generation.perchance.org/api/downloadTemporaryImage'
 
@@ -306,15 +306,27 @@ class ImageGeneratorGUI:
         self.style_var = tk.StringVar(master)
         self.style_var.set(style_names[0])  # Set default value to the first style name
 
+
         # Initialize the style dropdown with the list of style names
         self.style__label = ttk.Label(master, text="Styles:")
         self.style__label.place(x=20, y=140)
         self.style_dropdown = ttk.OptionMenu(master, self.style_var, style_names[0], *style_names)
         self.style_dropdown.place(x=120, y=140, width=200)
 
+        # Initialize the number of images dropdown
+        self.number_of_images_label = ttk.Label(master, text="Num of images:")
+        self.number_of_images_label.place(x=20, y=185)
+        self.number_of_images_var = tk.StringVar(master)
+        number_of_images_options = ["1", "3", "6"]
+        self.number_of_images_var.set(number_of_images_options[0])  # default value 1
+        self.number_of_images_dropdown = ttk.OptionMenu(
+            master, self.number_of_images_var, *number_of_images_options
+        )
+        self.number_of_images_dropdown.place(x=120, y=180, width=200)
+
         # Generate button
         self.generate_button = ttk.Button(master, text="Generate", command=self.generate_image)
-        self.generate_button.place(x=50, y=200, width=200)  # Added width
+        self.generate_button.place(x=50, y=280, width=200)  # Added width
 
         # Image display area
         self.image_frame = ttk.Label(master)
@@ -341,9 +353,10 @@ class ImageGeneratorGUI:
         self.generated_images.clear()
         self.photo.clear()
 
+        amount = int(self.number_of_images_var.get())  # Update the amount based on user selection
         generator = image_generator(
             base_filename=base_filename,
-            amount=6,
+            amount=amount,  # Use the selected amount
             prompt=prompt,
             resolution=resolution,
             guidance_scale=guidance_scale
@@ -362,40 +375,46 @@ class ImageGeneratorGUI:
     def display_images(self):
         self.image_canvas.delete("all")  # Clear any existing content on the canvas
         self.image_positions.clear()  # Clear previous positions
+        self.photo.clear()  # Clear previous photo references to prevent garbage collection
 
         canvas_width = self.image_canvas.winfo_width()
         canvas_height = self.image_canvas.winfo_height()
 
-        # Assuming 2 rows and 3 columns grid
-        img_width, img_height = canvas_width // 3, canvas_height // 2
-
-        # Adjust img_width and img_height if the images are smaller than the grid size
-        images = [Image.open(path) for path in self.generated_images]
-        max_width = max(img.size[0] for img in images)
-        max_height = max(img.size[1] for img in images)
-    
-        # Calculate scale factor to fit images within grid
-        scale_width = img_width / float(max_width)
-        scale_height = img_height / float(max_height)
-        scale_factor = min(scale_width, scale_height)
-    
-        for idx, img in enumerate(images):
-            img.thumbnail((max_width * scale_factor, max_height * scale_factor), Image.LANCZOS)
+        # Check how many images we need to display
+        number_of_images = int(self.number_of_images_var.get())
+        if number_of_images == 1:
+            # If there's only one image, use the whole canvas
+            img = Image.open(self.generated_images[0])
+            img.thumbnail((canvas_width, canvas_height), Image.LANCZOS)
             photo = ImageTk.PhotoImage(img)
-
-            # Calculate position
-            column = idx % 3
-            row = idx // 3
-            x = (column * img_width) + (img_width // 2)
-            y = (row * img_height) + (img_height - img.height // 2) // 2
-
-            # Display image on canvas
-            self.image_canvas.create_image(x, y, image=photo)
-            self.image_positions.append(((x - img.width // 2, y - img.height // 2, img.width, img.height), self.generated_images[idx]))
-
-            # Keep reference to avoid garbage collection
+            self.image_canvas.create_image(
+                canvas_width // 2, canvas_height // 2, image=photo
+            )
+            self.image_positions.append(
+                ((canvas_width // 2 - img.size[0] // 2, canvas_height // 2 - img.size[1] // 2, img.size[0], img.size[1]), self.generated_images[0])
+            )
             self.photo.append(photo)
+        else:
+            # Otherwise, we're using the grid layout
+            columns = 3
+            rows = (number_of_images - 1) // columns + 1
+            img_width, img_height = canvas_width // columns, canvas_height // rows
 
+            for idx, img_path in enumerate(self.generated_images):
+                img = Image.open(img_path)
+                img.thumbnail((img_width, img_height), Image.LANCZOS)
+                photo = ImageTk.PhotoImage(img)
+
+                # Calculate position
+                column = idx % columns
+                row = idx // columns
+                x = column * img_width + img_width // 2
+                y = row * img_height + img_height // 2
+
+                # Display image on canvas
+                self.image_canvas.create_image(x, y, image=photo)
+                self.image_positions.append(((x, y, img.size[0], img.size[1]), img_path))
+                self.photo.append(photo)
 
     def on_canvas_click(self, event):
         # Determine which image was clicked
@@ -412,6 +431,10 @@ class ImageGeneratorGUI:
             else:
                 opener = "open" if platform.system() == "Darwin" else "xdg-open"
                 subprocess.run([opener, img_path])
+
+# If any tkinter operations throw an error outside of the main thread, show an error dialog
+def show_error(err):
+    messagebox.showerror("Error", str(err))
 
 if __name__ == "__main__":
     root = tk.Tk()
