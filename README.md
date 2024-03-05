@@ -20,29 +20,10 @@ It is recommended to create an alias in `~/.bash_aliases` or equivalent, e.g.
 alias image-generator='python ~/perchance-image-generator/main.py'
 ```
 
-## CLI Guide
+## usage Guide
 ```
-usage: main.py [-h] [-f FILENAME] [-n NUMBER] [-p PROMPT] [-ps PROMPT_SIZE] [-np NEGATIVE_PROMPT] [-st STYLE] [-r RESOLUTION] [-gs GUIDANCE_SCALE]
+usage: python gui.py
 
-CLI Interface for Perchance's image generation.
-
-options:
-  -h, --help            show this help message and exit
-  -f FILENAME, --filename FILENAME
-                        Base filename for output images. Example: "new_picture".
-  -n NUMBER, --number NUMBER
-                        Number of images to generate.
-  -p PROMPT, --prompt PROMPT
-                        Prompt. Separate words with commas and spaces. Random by default.
-  -ps PROMPT_SIZE, --prompt-size PROMPT_SIZE
-                        Number of words to include in prompt. Applies only if random.
-  -np NEGATIVE_PROMPT, --negative-prompt NEGATIVE_PROMPT
-                        Negative prompt. Separate words with spaces. Includes "nudity" and "text" by default.
-  -st STYLE, --style STYLE
-                        Style. Random by default.
-  -r RESOLUTION, --resolution RESOLUTION
-                        Resolution. Example "512x768".
-  -gs GUIDANCE_SCALE, --guidance-scale GUIDANCE_SCALE
-                        Guidance scale for AI image generation. Float from 1 to 20.
+Then type your user input, select resolution, guidance scale and prefered style and his generate. really easy to use.
 
 ```
