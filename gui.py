@@ -100,8 +100,8 @@ def get_key():
         pass
 
     info_logger('Key no longer valid or not found. Looking for a new key...')
-    loop = asyncio.get_event_loop()
-    key = loop.run_until_complete(get_url_data())
+    # Modified line: Using asyncio.run() to automatically manage the event loop
+    key = asyncio.run(get_url_data())
 
     info_logger(f'Found key {key[:10]}...')
     with open('last-key.txt', 'w') as file:
@@ -232,7 +232,7 @@ class GeneratingPopup(Toplevel):
 class ImageGeneratorGUI:
     def __init__(self, master):
         self.master = master
-        master.title("Image Generator")
+        master.title("MakuluLinux Image Generator")
         master.geometry("950x600")  # Adjusted window size as needed
 
         # Initialize the canvas
